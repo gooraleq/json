@@ -14,26 +14,26 @@ using namespace std;
 const string plikUstawienia = "settings";
 const string najlepszeWyniki = "highscores";
 
-struct HighScoreEntry
+struct wynikiEntry
 {
-    string playerName; // nazwa gracza i wynik
-    int score;
+    string gracz; // nazwa gracza i wynik
+    int wynik;
 };
 
-bool compareByScore(const HighScoreEntry& a, const HighScoreEntry& b)
+bool porWynik(const wynikiEntry& x, const wynikiEntry& y)
 {
-    return a.score > b.score; // wpisy wynikÛw
+    return x.wynik > y.wynik; // wpisy wynik√≥w
 }
 
 
 
-void showHighScores()
+void showWyniki()
 {
     ifstream file(najlepszeWyniki);
     if (file.good())
 
     {
-        vector<HighScoreEntry> highScores; //  przechoanie wpisy wynikÛw
+        vector<wynikiEntry> Wyniki; //  przechoanie wpisy wynik√≥w
 
         string line;
         while (getline(file, line))
@@ -42,10 +42,10 @@ void showHighScores()
             DeserializationError error = deserializeJson(doc, line); // 
             if (!error)
             {
-                string playerName = doc["PlayerName"].as<string>(); // Odczytanie nazwy gracza i wyniku
-                int score = doc["Score"].as<int>();
+                string gracz = doc["PlayerName"].as<string>(); // Odczytanie nazwy gracza i wyniku
+                int wynik = doc["Score"].as<int>();
 
-                highScores.push_back({ playerName, score });
+                Wyniki.push_back({ gracz, wynik });
                 // Dodanie wpisu do wektora
             }
             else
@@ -59,13 +59,13 @@ void showHighScores()
 
 
         // sortowanie wynikow
-        sort(highScores.begin(), highScores.end(), compareByScore);
+        sort(Wyniki.begin(), Wyniki.end(), porWynik);
 
-        // Wyúwietlanie posortowanych wynikÛw
-        for (const auto& entry : highScores)
+        // Wy≈õwietlanie posortowanych wynik√≥w
+        for (const auto& entry : Wyniki)
         {
 
-            cout << "Gracz: " << entry.playerName << ", Wynik: " << entry.score << '\n'; // Wyúwietlenie posortowanych wpisÛw
+            cout << "Gracz: " << entry.gracz << ", Wynik: " << entry.wynik << '\n'; // Wy≈õwietlenie posortowanych wpis√≥w
         }
     }
     else
@@ -75,14 +75,14 @@ void showHighScores()
     }
 }
 
-void saveHighScore(const string& playerName, int score)
+void saveWynik(const string& gracz, int wynik)
 {
     ofstream file(najlepszeWyniki, ios::app); // Otwarcie pliku do zapisu
     if (file.good())
     {
         StaticJsonDocument<1024> doc;
-        doc["PlayerName"] = playerName; // Tworzenie dokumentu JSON z nazwπ gracza i wynikiem
-        doc["Score"] = score;
+        doc["PlayerName"] = gracz; // Tworzenie dokumentu JSON z nazwƒÖ gracza i wynikiem
+        doc["Score"] = wynik;
 
         serializeJson(doc, file); 
         file << '\n';
@@ -102,7 +102,7 @@ void showOptions(StaticJsonDocument<1024>& doc)
     //Pokazanie zawartosci
     for (JsonPair p : doc.as<JsonObject>())
     {
-        cout << p.key() << " " << p.value() << '\n'; // Wyúwietlenie klucza i wartoúci w dokumencie
+        cout << p.key() << " " << p.value() << '\n'; // Wy≈õwietlenie klucza i warto≈õci w dokumencie
     }
 }
 
@@ -174,7 +174,7 @@ void updateConfig(const string& key, const string& value)
 void graj();
 void instrukcja();
 void ustawienia();
-void highScores();
+void Wyniki();
 
 int main()
 {
@@ -216,7 +216,7 @@ int main()
         break;
     case 4:
         system("cls");
-        highScores();
+        Wyniki();
         break;
     case 5:
         return 0;
@@ -264,9 +264,8 @@ void ustawienia()
     do
     {
         cout << "1. Zmien rozdzielczosc\n";
-        cout << "2. Zmien tryb pelnoekranowy\n";
-        cout << "3. Zmien opcje V-Sync\n";
-        cout << "4. Powrot do menu glownego\n";
+        cout << "2. Zmien opcje V-Sync\n";
+        cout << "3. Powrot do menu glownego\n";
         cout << "Wybierz opcje (wpisz numer): ";
         cin >> wybor;
 
@@ -305,38 +304,8 @@ void ustawienia()
             break;
 
         }
+        
         case 2:
-        {
-            string trybPelnoekranowy;
-
-            cout << "Pelny ekran:\n";
-            cout << "--------------------\n";
-            cout << "1. Tak\n";
-            cout << "2. Nie\n";
-            cout << "Wybierz tryb (wpisz numer): ";
-            cin >> wybor;
-
-
-            switch (wybor)
-            {
-            case 1:
-                trybPelnoekranowy = "true";
-                break;
-            case 2:
-                trybPelnoekranowy = "false";
-                break;
-            default:
-                cout << "Niepoprawny wybor trybu pelnoekranowego. Powrot do menu glownego.\n";
-
-                main();
-
-                return;
-            }
-
-            updateConfig("Fullscreen", trybPelnoekranowy);
-            break;
-        }
-        case 3:
         {
             string VSync;
 
@@ -366,7 +335,7 @@ void ustawienia()
             updateConfig("V-Sync", VSync);
             break;
         }
-        case 4:
+        case 3:
             system("cls");
             main(); 
             return;
@@ -377,12 +346,12 @@ void ustawienia()
     } while (true);
 }
 
-void highScores()
+void Wyniki()
 {
     cout << "\nWyniki\n";
     cout << "--------------------\n";
 
-    showHighScores();
+    showWyniki();
 
     int wybor;
     do
@@ -453,11 +422,11 @@ void graj()
 
     cout << "\nJestes koksem! Twoj wynik to " << wynik << "!\n";
 
-    string playerName;
+    string gracz;
     cout << "Wpisz swoje imie: ";
-    cin >> playerName;
+    cin >> gracz;
 
-    saveHighScore(playerName, wynik);
+    saveWynik(gracz, wynik);
 
     int wybor;
     do
