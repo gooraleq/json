@@ -11,8 +11,8 @@
 
 using namespace std;
 
-const string plikUstawienia = "settings";
-const string najlepszeWyniki = "highscores";
+const string plikUstawienia = "opcje.json";
+const string najlepszeWyniki = "wyniki.json";
 
 struct wynikiEntry
 {
@@ -39,7 +39,7 @@ void showWyniki()
         while (getline(file, line))
         {
             StaticJsonDocument<1024> doc;
-            DeserializationError error = deserializeJson(doc, line); // 
+            DeserializationError error = deserializeJson(doc, line); //
             if (!error)
             {
                 string gracz = doc["PlayerName"].as<string>(); // Odczytanie nazwy gracza i wyniku
@@ -50,7 +50,7 @@ void showWyniki()
             }
             else
             {
-                cout << "Blad podczas odczytu danych z pliku highscores.json\n";
+                cout << "Blad podczas odczytu danych z pliku wyniki.json\n";
                 break;
             }
         }
@@ -62,15 +62,15 @@ void showWyniki()
         sort(Wyniki.begin(), Wyniki.end(), porWynik);
 
         // Wyświetlanie posortowanych wyników
-        for (const auto& entry : Wyniki)
+        for (const auto& para : Wyniki)
         {
 
-            cout << "Gracz: " << entry.gracz << ", Wynik: " << entry.wynik << '\n'; // Wyświetlenie posortowanych wpisów
+            cout << "Gracz: " << para.gracz << ", Wynik: " << para.wynik << '\n'; // Wyświetlenie posortowanych wpisów
         }
     }
     else
     {
-        cout << "Blad podczas otwierania pliku highscores.json\n";
+        cout << "Blad podczas otwierania pliku wyniki.json\n";
 
     }
 }
@@ -84,14 +84,14 @@ void saveWynik(const string& gracz, int wynik)
         doc["PlayerName"] = gracz; // Tworzenie dokumentu JSON z nazwą gracza i wynikiem
         doc["Score"] = wynik;
 
-        serializeJson(doc, file); 
+        serializeJson(doc, file);
         file << '\n';
 
         file.close();
     }
     else
     {
-        cout << "Blad podczas zapisu do pliku highscores.json\n";
+        cout << "Blad podczas zapisu do pliku wyniki.json\n";
 
     }
 }
@@ -117,7 +117,7 @@ void createDefaultConfig()
         doc["Fullscreen"] = true;
         doc["V-Sync"] = false;
 
-        serializeJson(doc, file); 
+        serializeJson(doc, file);
 
         file.close();
 
@@ -136,7 +136,7 @@ void updateConfig(const string& key, const string& value)
 
     {
         StaticJsonDocument<1024> doc;
-        DeserializationError error = deserializeJson(doc, readFile); 
+        DeserializationError error = deserializeJson(doc, readFile);
         readFile.close();
 
         if (!error)
@@ -171,95 +171,14 @@ void updateConfig(const string& key, const string& value)
 }
 
 
-void graj();
-void instrukcja();
-void ustawienia();
-void Wyniki();
 
-int main()
-{
-    // utworzenie pliku konfiguracyjnego
-    ifstream configFile(plikUstawienia);
-    if (!configFile.good())
-    {
-        createDefaultConfig();
-    }
-    configFile.close();
-
-
-
-    int opcja;
-
-    cout << "\nWitaj w programie\n";
-    cout << "--------------------\n";
-    cout << "1. Nowa gra\n";
-    cout << "2. Ustawienia\n";
-    cout << "3. Instrukcja gry\n";
-    cout << "4. Wyniki\n";
-    cout << "5. Wyjscie\n\n";
-    cout << "Wybierz opcje (wpisz numer): ";
-    cin >> opcja;
-
-    switch (opcja)
-    {
-    case 1:
-        system("cls");
-        graj();
-        break;
-    case 2:
-        system("cls");
-        ustawienia();
-        break;
-    case 3:
-        system("cls");
-        instrukcja();
-        break;
-    case 4:
-        system("cls");
-        Wyniki();
-        break;
-    case 5:
-        return 0;
-    default:
-        cout << "Zly wybor. Sprobuj jeszcze raz.\n";
-        break;
-    }
-
-    return 0;
-}
-
-
-
-void instrukcja()
-{
-    cout << "\nInstrukcja gry\n";
-    cout << "--------------------\n";
-    cout << "Twoim zadaniem jest zdobyc zloto\n";
-    cout << "Isc na targ.\n";
-    cout << "Kupic bron i zarobic najwiecej siana.\n";
-    cout << "Powodzenia czarnuchu!\n";
-
-    int wybor;
-    do
-    {
-        cout << "1. Wroc do menu glownego\n";
-        cout << "Wybierz opcje (wpisz numer): ";
-        cin >> wybor;
-
-        if (wybor != 1)
-        {
-            cout << "Zly wybor. Sprobuj jeszcze raz.\n";
-        }
-    } while (wybor != 1);
-    system("cls");
-    main();
-}
 
 void ustawienia()
 {
     cout << "\nUstawienia\n";
     cout << "--------------------\n";
 
+    bool czy = true;
     int wybor;
     do
     {
@@ -296,7 +215,6 @@ void ustawienia()
                 break;
             default:
                 cout << "Niepoprawny wybor rozdzielczosci. Powrot do menu glownego.\n";
-                main();
                 return;
             }
 
@@ -304,7 +222,7 @@ void ustawienia()
             break;
 
         }
-        
+
         case 2:
         {
             string VSync;
@@ -328,22 +246,25 @@ void ustawienia()
             default:
                 cout << "Niepoprawny wybor opcji V-Sync. Powrot do menu glownego.\n";
                 system("cls");
-                main();
                 return;
             }
 
             updateConfig("V-Sync", VSync);
             break;
         }
+
         case 3:
-            system("cls");
-            main(); 
-            return;
+            czy = false;
+            break;
+
         default:
             cout << "Zly wybor. Sprobuj jeszcze raz.\n";
             break;
+
+
+
         }
-    } while (true);
+    } while (czy == true);
 }
 
 void Wyniki()
@@ -353,23 +274,12 @@ void Wyniki()
 
     showWyniki();
 
-    int wybor;
-    do
-    {
-        cout << "\n1. Wroc do menu glownego\n";
-        cout << "Wybierz opcje (wpisz numer): ";
-        cin >> wybor;
+    cout << "wcisnij cos aby wrocic do menu" << endl;
 
-        if (wybor != 1)
-        {
-            cout << "Zly wybor. Sprobuj jeszcze raz.\n";
-        }
-    }
+    getchar();
+    getchar();
 
-    while (wybor != 1);
 
-    system("cls");
-    main(); 
 }
 
 void graj()
@@ -428,19 +338,62 @@ void graj()
 
     saveWynik(gracz, wynik);
 
-    int wybor;
-    do
+
+}
+
+
+
+
+int main()
+{
+    // utworzenie pliku konfiguracyjnego
+    ifstream configFile(plikUstawienia);
+    if (!configFile.good())
     {
-        cout << "\n1. Wroc do menu glownego\n";
+        createDefaultConfig();
+    }
+    configFile.close();
+
+
+
+    int opcja;
+
+    for (;;)
+    {
+        system("cls");
+        cout << "\nWitaj w programie\n";
+        cout << "--------------------\n";
+        cout << "1. Nowa gra\n";
+        cout << "2. Ustawienia\n";
+        cout << "3. Wyniki\n";
+        cout << "4. Wyjscie\n\n";
         cout << "Wybierz opcje (wpisz numer): ";
-        cin >> wybor;
+        cin >> opcja;
 
-        if (wybor != 1)
+        switch (opcja)
         {
-            cout << "Zly wybor. Sprobuj jeszcze raz.\n";
-        }
-    } while (wybor != 1);
+        case 1:
+            system("cls");
+            graj();
+            break;
+        case 2:
+            system("cls");
+            ustawienia();
+            break;
+        case 3:
+            system("cls");
+            Wyniki();
+            break;
+        case 4:
+            return 0;
+            break;
 
-    system("cls");
-    main();
+
+        default:
+            cout << "Zly wybor. Sprobuj jeszcze raz.\n";
+            break;
+        }
+
+    }
+    return 0;
 }
